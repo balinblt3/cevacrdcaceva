@@ -1,4 +1,4 @@
-# main.py - YT-DLP Audio API - 100% FUNCȚIONAL
+# main.py - YT-DLP Audio API - mweb BYPASS
 from flask import Flask, request
 import subprocess
 import re
@@ -15,12 +15,12 @@ def get_audio_url():
     try:
         cmd = [
             "yt-dlp",
-            "-f", "140",  # m4a, 128kbps, direct
+            "-f", "140",  # m4a direct
             "--get-url",
             "--no-playlist",
-            "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "--referer", "https://www.youtube.com/",
-            "--add-header", "Accept-Language:en-US,en;q=0.9",
+            "--user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15",
+            "--referer", "https://m.youtube.com/",
+            "--extractor-args", "youtube:player-client=mweb",
             f"https://www.youtube.com/watch?v={video_id}"
         ]
         
@@ -36,8 +36,6 @@ def get_audio_url():
         
         if result.returncode != 0:
             error = result.stderr.strip()
-            if "Sign in" in error or "bot" in error:
-                return "YouTube bot detection. Try again later.", 503
             return f"yt-dlp error: {error}", 500
             
         if not url or not url.startswith("http"):
