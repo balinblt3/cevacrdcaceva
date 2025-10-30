@@ -1,4 +1,4 @@
-# main.py - VERSIUNE FINALĂ – FĂRĂ FFMPEG
+# main.py - YT-DLP Audio API - 100% FUNCȚIONAL
 from flask import Flask, request
 import subprocess
 import re
@@ -13,12 +13,14 @@ def get_audio_url():
         return "Invalid YouTube ID", 400
 
     try:
-        # FORMAT AUDIO SIMPLU – NU ARE NEVOIE DE FFMPEG
         cmd = [
             "yt-dlp",
-            "-f", "140",  # m4a, 128kbps, direct URL
+            "-f", "140",  # m4a, 128kbps, direct
             "--get-url",
             "--no-playlist",
+            "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "--referer", "https://www.youtube.com/",
+            "--add-header", "Accept-Language:en-US,en;q=0.9",
             f"https://www.youtube.com/watch?v={video_id}"
         ]
         
@@ -26,14 +28,17 @@ def get_audio_url():
             cmd,
             capture_output=True,
             text=True,
-            timeout=15,
+            timeout=20,
             check=False
         )
         
         url = result.stdout.strip()
         
         if result.returncode != 0:
-            return f"yt-dlp error: {result.stderr}", 500
+            error = result.stderr.strip()
+            if "Sign in" in error or "bot" in error:
+                return "YouTube bot detection. Try again later.", 503
+            return f"yt-dlp error: {error}", 500
             
         if not url or not url.startswith("http"):
             return "Failed to extract URL", 500
